@@ -1,0 +1,19 @@
+replicaCount: 1
+
+backend:
+  image:
+    repository: docker-kube-demo-backend
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8000
+
+frontend:
+  image:
+    repository: docker-kube-demo-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: LoadBalancer # Use LoadBalancer to expose the frontend externally
+    port: 8501
