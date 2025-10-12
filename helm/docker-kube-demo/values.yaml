@@ -2,7 +2,7 @@ replicaCount: 1
 
 backend:
   image:
-    repository: docker-kube-demo-backend
+    repository: dwtwp/docker-kube-demo-backend
     tag: latest
     pullPolicy: IfNotPresent
   service:
@@ -11,7 +11,7 @@ backend:
 
 frontend:
   image:
-    repository: docker-kube-demo-frontend
+    repository: dwtwp/docker-kube-demo-frontend
     tag: latest
     pullPolicy: IfNotPresent
   service:
