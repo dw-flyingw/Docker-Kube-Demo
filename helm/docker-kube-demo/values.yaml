@@ -1,19 +1,74 @@
-replicaCount: 1
-
-backend:
-  image:
-    repository: dwtwp/docker-kube-demo-backend
-    tag: latest
-    pullPolicy: IfNotPresent
-  service:
-    type: ClusterIP
-    port: 8000
+replicaCount: 1 
+namespace: "docker-kube-demo"
 
 frontend:
   image:
     repository: dwtwp/docker-kube-demo-frontend
-    tag: latest
+    tag: latest 
     pullPolicy: IfNotPresent
+  
   service:
-    type: LoadBalancer # Use LoadBalancer to expose the frontend externally
+    type: ClusterIP
     port: 8501
+    targetPort: 8501
+    protocol: TCP
+    name: frontend-service 
+  
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+  
+  app:
+    port: 8501
+    name: http-frontend
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: "" 
+
+
+backend:
+  replicaCount: 1 
+  
+  image:
+    repository: dwtwp/docker-kube-demo-backend
+    pullPolicy: IfNotPresent 
+    tag: latest 
+  
+  service:
+    type: ClusterIP
+    port: 8000
+    targetPort: 8000
+    protocol: TCP
+    name: backend-service 
+  
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+  
+  app:
+    port: 8000
+    name: http-backend
+
+env:
+  PYTHONUNBUFFERED: "1"
+  HTTP_PROXY: ""
+  HTTPS_PROXY: ""
+  NO_PROXY: "localhost,127.0.0.1,0.0.0.0,::1,frontend-service,backend-service" 
+  REQUESTS_CA_BUNDLE: ""
+  CURL_CA_BUNDLE: ""
+
+ezua:
+  virtualService:
+    endpoint: "docker-kube-demo.${DOMAIN_NAME}"
+    istioGateway: "istio-system/ezaf-gateway"

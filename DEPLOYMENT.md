@@ -132,3 +132,7 @@ After deploying, verify that your application components are running correctly i
     Once you have the `EXTERNAL-IP` (for LoadBalancer) or Node IP and NodePort, you can access your Streamlit application in your web browser. For example, if the external IP is `XXX.XXX.XXX.XXX`, you would go to `http://XXX.XXX.XXX.XXX:8501`.
 
 ---
+
+## DEMO PORTAL
+https://hpedemoportal.ext.hpe.com/home
+https://hpedemoportal.ext.hpe.com?demoid=9303

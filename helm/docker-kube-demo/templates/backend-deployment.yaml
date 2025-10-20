@@ -2,36 +2,37 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "docker-kube-demo.fullname" . }}-backend
+  namespace: {{ .Values.namespace }}
   labels:
     {{- include "docker-kube-demo.labels" . | nindent 4 }}
-    app.kubernetes.io/component: backend
+    {{- include "hpe-ezua.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       {{- include "docker-kube-demo.selectorLabels" . | nindent 6 }}
-      app.kubernetes.io/component: backend
   template:
     metadata:
       labels:
         {{- include "docker-kube-demo.selectorLabels" . | nindent 8 }}
-        app.kubernetes.io/component: backend
     spec:
+      {{- if .Values.persistence.enabled }}
+      volumes:
+        - name: shared-storage
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim }}
+      {{- end }}
       containers:
         - name: backend
           image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
-          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.backend.service.port }}
-          livenessProbe:
-            httpGet:
-              path: /
-              port: {{ .Values.backend.service.port }}
-            initialDelaySeconds: 5
-            periodSeconds: 5
-          readinessProbe:
-            httpGet:
-              path: /
-              port: {{ .Values.backend.service.port }}
-            initialDelaySeconds: 5
-            periodSeconds: 5
+          env:
+            - name: API_KEY
+              value: {{ .Values.apiKey.value | quote }}
+          {{- if .Values.persistence.enabled }}
+          volumeMounts:
+            - name: shared-storage
+              mountPath: {{ .Values.persistence.mountPath }}
+              subPath: {{ .Values.persistence.subPath }}
+          {{- end }}

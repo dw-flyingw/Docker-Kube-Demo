@@ -1,0 +1,24 @@
+{{- if .Values.ezua.enabled }}
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ include "docker-kube-demo.fullname" . }}-backend
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "docker-kube-demo.labels" . | nindent 4 }}
+    {{- include "hpe-ezua.labels" . | nindent 4 }}
+spec:
+  hosts:
+    - "{{ .Values.ezua.virtualService.backendEndpoint }}"
+  gateways:
+    - "{{ .Values.ezua.virtualService.istioGateway }}"
+  http:
+    - match:
+        - uri:
+            prefix: "/"
+      route:
+        - destination:
+            host: {{ include "docker-kube-demo.fullname" . }}-backend
+            port:
+              number: {{ .Values.backend.service.port }}
+{{- end }}

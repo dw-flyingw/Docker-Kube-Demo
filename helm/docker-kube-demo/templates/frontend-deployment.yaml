@@ -2,39 +2,39 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "docker-kube-demo.fullname" . }}-frontend
+  namespace: {{ .Values.namespace }}
   labels:
     {{- include "docker-kube-demo.labels" . | nindent 4 }}
-    app.kubernetes.io/component: frontend
+    {{- include "hpe-ezua.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       {{- include "docker-kube-demo.selectorLabels" . | nindent 6 }}
-      app.kubernetes.io/component: frontend
   template:
     metadata:
       labels:
         {{- include "docker-kube-demo.selectorLabels" . | nindent 8 }}
-        app.kubernetes.io/component: frontend
     spec:
+      {{- if .Values.persistence.enabled }}
+      volumes:
+        - name: shared-storage
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim }}
+      {{- end }}
       containers:
         - name: frontend
           image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
-          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.frontend.service.port }}
           env:
             - name: BACKEND_URL
               value: "http://{{ include "docker-kube-demo.fullname" . }}-backend:{{ .Values.backend.service.port }}"
-          livenessProbe:
-            httpGet:
-              path: /healthz
-              port: {{ .Values.frontend.service.port }}
-            initialDelaySeconds: 5
-            periodSeconds: 5
-          readinessProbe:
-            httpGet:
-              path: /healthz
-              port: {{ .Values.frontend.service.port }}
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            - name: API_KEY
+              value: {{ .Values.apiKey.value | quote }}
+          {{- if .Values.persistence.enabled }}
+          volumeMounts:
+            - name: shared-storage
+              mountPath: {{ .Values.persistence.mountPath }}
+              subPath: {{ .Values.persistence.subPath }}
+          {{- end }}
