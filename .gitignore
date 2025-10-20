@@ -1,3 +1,13 @@
+# Project Specific
+output
+dicom
+.DS_Store
+output*
+dicom*
+.setup_state*
+,genkit
+.gemini
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
