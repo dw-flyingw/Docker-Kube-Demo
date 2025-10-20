@@ -1,4 +1,6 @@
 # Project Specific
+update_guide.sh
+mk_guide.sh
 output
 dicom
 .DS_Store
